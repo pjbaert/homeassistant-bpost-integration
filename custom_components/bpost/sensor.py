@@ -3,12 +3,14 @@ from __future__ import annotations
 from collections import Mapping
 from typing import Any
 
-from homeassistant.components.bpost import DOMAIN, BpostEntryData
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import StateType
 from homeassistant.helpers.update_coordinator import CoordinatorEntity, DataUpdateCoordinator
+
+from . import BpostEntryData
+from .const import DOMAIN
 
 
 async def async_setup_entry(hass, entry: ConfigEntry, async_add_entities: AddEntitiesCallback):

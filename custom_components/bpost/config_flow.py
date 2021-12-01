@@ -5,15 +5,15 @@ import logging
 from typing import Any
 
 import voluptuous as vol
-
-from my_bpost_api import BpostApi, AuthenticationException, BpostApiException
 from homeassistant import config_entries
+from homeassistant.const import CONF_CODE, CONF_EMAIL
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.exceptions import HomeAssistantError
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
+from my_bpost_api import AuthenticationException, BpostApi, BpostApiException
+
 from .const import DOMAIN
-from ...const import CONF_EMAIL, CONF_CODE
-from ...helpers.aiohttp_client import async_get_clientsession
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -38,7 +38,10 @@ async def validate_email(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
 
     email_address = email_address.lower()
 
-    async with BpostApi(email=email_address, session_callback=lambda: async_get_clientsession(hass, True)) as bpost_api:
+    async with BpostApi(
+        email=email_address,
+        session_callback=lambda: async_get_clientsession(hass, True),
+    ) as bpost_api:
         try:
             await bpost_api.async_users_email_login()
         except AuthenticationException as exc:
@@ -56,7 +59,10 @@ async def validate_code(hass: HomeAssistant, email_address: str, data: dict[str,
     if code is None:
         raise ValueError("No verification code provided")
 
-    async with BpostApi(email=email_address, session_callback=lambda: async_get_clientsession(hass, True)) as bpost_api:
+    async with BpostApi(
+        email=email_address,
+        session_callback=lambda: async_get_clientsession(hass, True),
+    ) as bpost_api:
         try:
             await bpost_api.async_users_email_login_verify_code(code)
         except AuthenticationException as exc:
@@ -71,20 +77,16 @@ async def validate_code(hass: HomeAssistant, email_address: str, data: dict[str,
             }
 
 
-class BpostConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
+class BpostConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # type: ignore
     """Handle a config flow for BPost."""
 
     VERSION = 1
 
-    async def async_step_user(
-            self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    async def async_step_user(self, user_input: dict[str, Any] | None = None) -> FlowResult:
         """Handle the initial step."""
 
         if user_input is None:
-            return self.async_show_form(
-                step_id="user", data_schema=STEP_USER_EMAIL_SCHEMA
-            )
+            return self.async_show_form(step_id="user", data_schema=STEP_USER_EMAIL_SCHEMA)
 
         errors = {}
 
@@ -104,16 +106,15 @@ class BpostConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             self._abort_if_unique_id_configured()
             return await self.async_step_verify_code()
 
-        return self.async_show_form(
-            step_id="user", data_schema=STEP_USER_EMAIL_SCHEMA, errors=errors
-        )
+        return self.async_show_form(step_id="user", data_schema=STEP_USER_EMAIL_SCHEMA, errors=errors)
 
     async def async_step_verify_code(self, user_input: dict | None = None) -> FlowResult:
         """Handle the verification code step."""
 
         if user_input is None:
             return self.async_show_form(
-                step_id="verify_code", data_schema=STEP_USER_VERIFICATION_SCHEMA
+                step_id="verify_code",
+                data_schema=STEP_USER_VERIFICATION_SCHEMA,
             )
 
         errors = {}
@@ -133,7 +134,9 @@ class BpostConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             return await self.async_create_or_update_entry(info)
 
         return self.async_show_form(
-            step_id="verify_code", data_schema=STEP_USER_VERIFICATION_SCHEMA, errors=errors
+            step_id="verify_code",
+            data_schema=STEP_USER_VERIFICATION_SCHEMA,
+            errors=errors,
         )
 
     async def async_create_or_update_entry(self, info: dict[str, Any]) -> FlowResult:

@@ -5,9 +5,10 @@ import logging
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers import entity_registry
+
 from .bpost_entry_data import BpostEntryData
 from .const import DOMAIN
-from ...helpers import entity_registry
 
 PLATFORMS: list[str] = ["sensor", "binary_sensor", "camera"]
 _LOGGER = logging.getLogger(__name__)
@@ -21,8 +22,7 @@ async def async_setup(hass: HomeAssistant, config: dict):
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up bpost from a config entry."""
-    entry_data = BpostEntryData(
-        data=entry.data, hass=hass, logger=_LOGGER)
+    entry_data = BpostEntryData(data=entry.data, hass=hass, logger=_LOGGER)
     hass.data[DOMAIN][entry.entry_id] = entry_data
 
     def update_callback() -> None:
@@ -32,7 +32,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         to_remove = []
 
         for platform_key, platform_data in entry_data.coordinator.data.items():
-            for sensor_id, sensor_data in platform_data.items():
+            for sensor_id, _sensor_data in platform_data.items():
                 current.append(f"{DOMAIN}_{platform_key}_{sensor_id}")
 
         for entity in entities:

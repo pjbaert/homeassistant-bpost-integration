@@ -4,10 +4,11 @@ from collections import Mapping
 from typing import Any
 
 from homeassistant.components.binary_sensor import BinarySensorEntity
-from homeassistant.components.bpost import DOMAIN, BpostEntryData
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity, DataUpdateCoordinator
+
+from . import DOMAIN, BpostEntryData
 
 
 async def async_setup_entry(hass, entry: ConfigEntry, async_add_entities: AddEntitiesCallback):
@@ -15,13 +16,12 @@ async def async_setup_entry(hass, entry: ConfigEntry, async_add_entities: AddEnt
 
     entry_data: BpostEntryData = hass.data[DOMAIN][entry.entry_id]
     async_add_entities(
-        BpostBinarySensor(entry_data.coordinator, ent) for idx, ent in
-        enumerate(entry_data.coordinator.data["binary_sensor"])
+        BpostBinarySensor(entry_data.coordinator, ent)
+        for idx, ent in enumerate(entry_data.coordinator.data["binary_sensor"])
     )
 
 
 class BpostBinarySensor(CoordinatorEntity, BinarySensorEntity):
-
     def __init__(self, coordinator: DataUpdateCoordinator, sensor_id: str):
         """Pass coordinator to CoordinatorEntity."""
         super().__init__(coordinator)

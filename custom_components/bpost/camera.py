@@ -1,17 +1,18 @@
 from __future__ import annotations
 
 import collections
-from typing import Mapping, Any
+from typing import Any, Mapping
 
-from my_bpost_api import BpostApi
-
-from homeassistant.components.bpost import DOMAIN, BpostEntryData
-from homeassistant.components.camera import Camera, DEFAULT_CONTENT_TYPE
+from homeassistant.components.camera import DEFAULT_CONTENT_TYPE, Camera
 from homeassistant.components.stream import Stream
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity, DataUpdateCoordinator
+from my_bpost_api import BpostApi
+
+from . import BpostEntryData
+from .const import DOMAIN
 
 
 async def async_setup_entry(hass, entry: ConfigEntry, async_add_entities: AddEntitiesCallback):
@@ -19,13 +20,12 @@ async def async_setup_entry(hass, entry: ConfigEntry, async_add_entities: AddEnt
 
     entry_data: BpostEntryData = hass.data[DOMAIN][entry.entry_id]
     async_add_entities(
-        BpostCamera(entry_data.coordinator, ent, entry_data.api.token) for idx, ent in
-        enumerate(entry_data.coordinator.data["camera"])
+        BpostCamera(entry_data.coordinator, ent, entry_data.api.token)
+        for idx, ent in enumerate(entry_data.coordinator.data["camera"])
     )
 
 
 class BpostCamera(CoordinatorEntity, Camera):
-
     def __init__(self, coordinator: DataUpdateCoordinator, sensor_id: str, token: str):
         super().__init__(coordinator)
         self.sensor_id = sensor_id
@@ -58,9 +58,14 @@ class BpostCamera(CoordinatorEntity, Camera):
         await self._download_image()
 
     async def _download_image(self):
-        bpost_api = BpostApi(token=self._token, email=None,
-                             session_callback=lambda: async_get_clientsession(self.hass, True))
-        self._image = await bpost_api.async_get_mail_image(self.coordinator.data[self.platform.domain][self.sensor_id]["data"])
+        bpost_api = BpostApi(
+            token=self._token,
+            email=None,
+            session_callback=lambda: async_get_clientsession(self.hass, True),
+        )
+        self._image = await bpost_api.async_get_mail_image(
+            self.coordinator.data[self.platform.domain][self.sensor_id]["data"]
+        )
 
     @property
     def extra_state_attributes(self) -> Mapping[str, Any] | None:
