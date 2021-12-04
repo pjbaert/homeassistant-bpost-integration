@@ -20,19 +20,19 @@ Only features with a ☑️ are available at the moment. Other features are plan
 
 #### Sensor
 
-* [x] The amount of mail you will receive today: `bpost_sensor_mail_today` (extra attribute containing unique IDs of the mail)
+* [x] The amount of mail you will receive today: `sensor.mail_today` (extra attribute containing unique IDs of the mail)
 * [ ] Information about parcels you're tracking
 
 #### Binary sensor
 
-* [x] If mail has been processed today: `bpost_binary_sensor_mail_processed_today`
-* [x] If you've configured the mail service correctly: `bpost_binary_sensor_mail_service_available`
+* [x] If mail has been processed today: `binary_sensor.mail_processed_today`
+* [x] If you've configured the mail service correctly: `binary_sensor.mail_service_available`
 * [ ] If you're expecting a parcel
 
 #### Camera
 
 * [x] Pictures of the mail you will receive. The image will be available with a unique ID in the form `bpost_camera_id`.
-    The list of IDs can be found in the `bpost_sensor_mail_today` extra attribute.
+    The list of IDs can be found in the `mail_today` extra attribute.
     This entity has an extra attribute `expected_delivery_date` with a timestamp indicating when the mail should arrive.
 
 ### Services
