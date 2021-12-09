@@ -28,19 +28,17 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     def update_callback() -> None:
         registry = entity_registry.async_get(hass)
         entities = entity_registry.async_entries_for_config_entry(registry, entry.entry_id)
-        current = []
-        to_remove = []
+        entity_ids = [entity.entity_id for entity in entities]
+        current: list[str] = []
 
         for platform_key, platform_data in entry_data.coordinator.data.items():
             for sensor_id, _sensor_data in platform_data.items():
                 current.append(f"{DOMAIN}_{platform_key}_{sensor_id}")
 
-        for entity in entities:
-            if entity.unique_id not in current:
-                to_remove.append(entity.entity_id)
+        to_remove = [entity_id for entity_id in entity_ids if entity_id not in current]
 
-        for tr in to_remove:
-            registry.async_remove(tr)
+        for entity_id in to_remove:
+            registry.async_remove(entity_id)
 
     entry_data.coordinator.async_add_listener(update_callback)
 

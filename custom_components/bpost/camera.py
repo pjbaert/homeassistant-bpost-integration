@@ -6,6 +6,7 @@ from typing import Any, Mapping
 from homeassistant.components.camera import DEFAULT_CONTENT_TYPE, Camera
 from homeassistant.components.stream import Stream
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.helpers import entity_registry
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity, DataUpdateCoordinator
@@ -23,6 +24,19 @@ async def async_setup_entry(hass, entry: ConfigEntry, async_add_entities: AddEnt
         BpostCamera(entry_data.coordinator, ent, entry_data.api.token)
         for idx, ent in enumerate(entry_data.coordinator.data["camera"])
     )
+
+    def add_new_entities() -> None:
+        entities = entity_registry.async_entries_for_config_entry(entity_registry.async_get(hass), entry.entry_id)
+        entity_ids = [
+            entity.entity_id for entity in entities if entity.domain == DOMAIN and entity.platform == "camera"
+        ]
+        async_add_entities(
+            BpostCamera(entry_data.coordinator, ent, entry_data.api.token)
+            for ent in entry_data.coordinator.data["camera"]
+            if ent["entity_id"] not in entity_ids
+        )
+
+    entry_data.coordinator.async_add_listener(add_new_entities)
 
 
 class BpostCamera(CoordinatorEntity, Camera):

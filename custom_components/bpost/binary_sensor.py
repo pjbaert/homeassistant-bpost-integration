@@ -5,6 +5,7 @@ from typing import Any
 
 from homeassistant.components.binary_sensor import BinarySensorEntity
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.helpers import entity_registry
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity, DataUpdateCoordinator
 
@@ -19,6 +20,19 @@ async def async_setup_entry(hass, entry: ConfigEntry, async_add_entities: AddEnt
         BpostBinarySensor(entry_data.coordinator, ent)
         for idx, ent in enumerate(entry_data.coordinator.data["binary_sensor"])
     )
+
+    def add_new_entities() -> None:
+        entities = entity_registry.async_entries_for_config_entry(entity_registry.async_get(hass), entry.entry_id)
+        entity_ids = [
+            entity.entity_id for entity in entities if entity.domain == DOMAIN and entity.platform == "binary_sensor"
+        ]
+        async_add_entities(
+            BpostBinarySensor(entry_data.coordinator, ent)
+            for ent in entry_data.coordinator.data["binary_sensor"]
+            if ent["entity_id"] not in entity_ids
+        )
+
+    entry_data.coordinator.async_add_listener(add_new_entities)
 
 
 class BpostBinarySensor(CoordinatorEntity, BinarySensorEntity):
