@@ -7,7 +7,7 @@ license = "MIT"
 
 [tool.poetry.dependencies]
 python = "^3.8"
-homeassistant = "^2021.11.5"
+homeassistant = "^2021.12.1"
 my-bpost-api = ">=0.2.0"
 
 [tool.poetry.dev-dependencies]
