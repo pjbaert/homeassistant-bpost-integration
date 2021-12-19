@@ -1,6 +1,6 @@
 # My bpost integration for Home Assistant
 
-[![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
+[![hacs_badge](https://img.shields.io/badge/HACS-Default-41BDF5.svg)](https://github.com/hacs/integration)
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/sdebruyn/homeassistant-bpost-integration/main.svg)](https://results.pre-commit.ci/latest/github/sdebruyn/homeassistant-bpost-integration/main)
 ![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/sdebruyn/homeassistant-bpost-integration/Validate/main)
 ![GitHub](https://img.shields.io/github/license/sdebruyn/my-bpost-api)
@@ -43,11 +43,7 @@ Only features with a ☑️ are available at the moment. Other features are plan
 
 ### Installing the integration as a custom component
 
-1. Make sure [HACS](https://hacs.xyz/) is installed.
-2. Open HACS > Integrations and press the top right button to add a custom repository.
-3. Enter `https://github.com/sdebruyn/homeassistant-bpost-integration` as repository and `Integration` as category.
-4. Download the integration in HACS (should have appeared in your HACS integrations).
-5. Restart Home Assistant if this is your first custom component.
+This repository is included in the [HACS](https://hacs.xyz) repositories.
 
 ### Configure the integration in Home Assistant
 
