@@ -1,0 +1,35 @@
+{
+  "title": "bpost Mijn post & pakjes tracking",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Configureer je bpost account",
+        "description": "Vul het e-mailadres in dat je gebruikte om je My bpost app te configureren. De mobiele app moet configureerd zijn om de Mijn post & pakjes tracking te kunnen gebruiken.",
+        "data": {
+          "email": "E-mailadres"
+        }
+      },
+      "verify_code": {
+        "title": "Verificatie",
+        "description": "bpost stuurde je een e-mail met een verificatie code. Vul deze code in.",
+        "data": {
+          "code": "Verificatie code"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Verificatie",
+        "description": "Je authenticatie is verlopen. Ga verder door je opnieuw te authenticeren. Je zal een verificatiecode ontvangen via e-mail."
+      }
+    },
+    "error": {
+      "cannot_connect": "De connectie met de bpost API mislukte. Verifieer dat Home Assistant is geconnecteerd met het internet, bekijk de logs & maak een issue aan.",
+      "invalid_auth": "Het account bestaat niet of de verificatie faalde.",
+      "invalid_email": "Onjuist e-mailadres.",
+      "invalid_code": "Onjuiste verificatie code.",
+      "unknown": "Onbekende fout. Bekijk de logs & maak een issue aan."
+    },
+    "abort": {
+      "already_configured": "Dit account is reeds geconfigureerd."
+    }
+  }
+}
