@@ -19,19 +19,20 @@ async def async_setup_entry(hass, entry: ConfigEntry, async_add_entities: AddEnt
 
     entry_data: BpostEntryData = hass.data[DOMAIN][entry.entry_id]
     async_add_entities(
-        BpostSensor(entry_data.coordinator, ent) for idx, ent in enumerate(entry_data.coordinator.data["sensor"])
+        BpostSensor(entry_data.coordinator, sensor_id) for sensor_id in entry_data.coordinator.data["sensor"].keys()
     )
 
     def add_new_entities() -> None:
         entities = entity_registry.async_entries_for_config_entry(entity_registry.async_get(hass), entry.entry_id)
-        entity_ids = [
-            entity.entity_id for entity in entities if entity.domain == DOMAIN and entity.platform == "sensor"
+        current_ids = [
+            entity.entity_id.split(".")[1]
+            for entity in entities
+            if entity.platform == DOMAIN and entity.domain == "sensor"
         ]
-        async_add_entities(
-            BpostSensor(entry_data.coordinator, ent)
-            for ent in entry_data.coordinator.data["sensor"]
-            if ent["entity_id"] not in entity_ids
-        )
+        data_ids = entry_data.coordinator.data["sensor"].keys()
+        to_add = [entity_id for entity_id in data_ids if entity_id not in current_ids]
+
+        async_add_entities(BpostSensor(entry_data.coordinator, sensor_id) for sensor_id in to_add)
 
     entry_data.coordinator.async_add_listener(add_new_entities)
 
