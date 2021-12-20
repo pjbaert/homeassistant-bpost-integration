@@ -7,7 +7,6 @@ from homeassistant.components.camera import DEFAULT_CONTENT_TYPE, Camera
 from homeassistant.components.stream import Stream
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers import entity_registry
-from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity, DataUpdateCoordinator
 from my_bpost_api import BpostApi
@@ -21,32 +20,32 @@ async def async_setup_entry(hass, entry: ConfigEntry, async_add_entities: AddEnt
 
     entry_data: BpostEntryData = hass.data[DOMAIN][entry.entry_id]
     async_add_entities(
-        BpostCamera(entry_data.coordinator, ent, entry_data.api.token)
-        for idx, ent in enumerate(entry_data.coordinator.data["camera"])
+        BpostCamera(entry_data.coordinator, sensor_id, entry_data.api)
+        for sensor_id in entry_data.coordinator.data["camera"].keys()
     )
 
     def add_new_entities() -> None:
         entities = entity_registry.async_entries_for_config_entry(entity_registry.async_get(hass), entry.entry_id)
-        entity_ids = [
-            entity.entity_id for entity in entities if entity.domain == DOMAIN and entity.platform == "camera"
+        current_ids = [
+            entity.entity_id.split(".")[1]
+            for entity in entities
+            if entity.platform == DOMAIN and entity.domain == "camera"
         ]
-        async_add_entities(
-            BpostCamera(entry_data.coordinator, ent, entry_data.api.token)
-            for ent in entry_data.coordinator.data["camera"]
-            if ent["entity_id"] not in entity_ids
-        )
+        data_ids = entry_data.coordinator.data["camera"].keys()
+        to_add = [entity_id for entity_id in data_ids if entity_id not in current_ids]
+
+        async_add_entities(BpostCamera(entry_data.coordinator, sensor_id, entry_data.api) for sensor_id in to_add)
 
     entry_data.coordinator.async_add_listener(add_new_entities)
 
 
 class BpostCamera(CoordinatorEntity, Camera):
-    def __init__(self, coordinator: DataUpdateCoordinator, sensor_id: str, token: str):
+    def __init__(self, coordinator: DataUpdateCoordinator, sensor_id: str, api: BpostApi):
         super().__init__(coordinator)
         self.sensor_id = sensor_id
-        self._token = token
+        self._api = api
         self._image = None
 
-        self.is_streaming: bool = False
         self.stream: Stream | None = None
         self.stream_options: dict[str, str] = {}
         self.content_type: str = DEFAULT_CONTENT_TYPE
@@ -72,14 +71,21 @@ class BpostCamera(CoordinatorEntity, Camera):
         await self._download_image()
 
     async def _download_image(self):
-        bpost_api = BpostApi(
-            token=self._token,
-            email=None,
-            session_callback=lambda: async_get_clientsession(self.hass, True),
-        )
-        self._image = await bpost_api.async_get_mail_image(
+        self._image = await self._api.async_get_mail_image(
             self.coordinator.data[self.platform.domain][self.sensor_id]["data"]
         )
+
+    @property
+    def is_recording(self) -> bool:
+        return False
+
+    @property
+    def is_streaming(self) -> bool:
+        return False
+
+    @property
+    def motion_detection_enabled(self) -> bool:
+        return False
 
     @property
     def extra_state_attributes(self) -> Mapping[str, Any] | None:
